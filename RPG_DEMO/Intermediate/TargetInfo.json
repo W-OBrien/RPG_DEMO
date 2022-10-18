@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "RPG_DEMO",
+			"Path": "C:\\Users\\willo\\Documents\\Unreal Projects\\RPG_DEMO\\RPG_DEMO\\Source\\RPG_DEMO.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "RPG_DEMOEditor",
+			"Path": "C:\\Users\\willo\\Documents\\Unreal Projects\\RPG_DEMO\\RPG_DEMO\\Source\\RPG_DEMOEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

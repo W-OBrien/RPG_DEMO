@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\RPG_DEMO.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\RPG_DEMO.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\RPG_DEMOEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Config">
+      <UniqueIdentifier>{FA535FFB-25E1-3D20-B416-52F9BE21E06E}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\RPG_DEMO">
+      <UniqueIdentifier>{C8704520-8B45-3737-9AE9-A66CF34446B5}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\RPG_DEMO\RPG_DEMO.Build.cs">
+      <Filter>Source\RPG_DEMO</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\RPG_DEMO\RPG_DEMO.cpp">
+      <Filter>Source\RPG_DEMO</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RPG_DEMO\RPG_DEMO.h">
+      <Filter>Source\RPG_DEMO</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RPG_DEMO\RPG_DEMOGameModeBase.cpp">
+      <Filter>Source\RPG_DEMO</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RPG_DEMO\RPG_DEMOGameModeBase.h">
+      <Filter>Source\RPG_DEMO</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
