@@ -41,6 +41,9 @@
 *.VC.db
 *.VC.opendb
 
+# Ignore .uasset files
+*.uasset
+
 # Precompiled Assets
 SourceArt/**/*.png
 SourceArt/**/*.tga
