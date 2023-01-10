@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Components/BoxComponent.h"
 #include "SpawnZone.generated.h"
 
 UCLASS()
@@ -15,6 +17,13 @@ public:
 	// Sets default values for this actor's properties
 	ASpawnZone();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn")
+	class UBoxComponent* SpawnBox;
+
+	//spawn a pawn in volume
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn")
+	//TSubclassOf<include class to spawn> SpawnPawn;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -22,5 +31,10 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UKismetMathLibrary* KMath;
+
+	UFUNCTION(BlueprintPure, Category = "Spawn")
+	FVector GetSpawnPoint();
 
 };

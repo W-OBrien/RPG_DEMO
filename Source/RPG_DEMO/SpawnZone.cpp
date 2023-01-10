@@ -9,6 +9,7 @@ ASpawnZone::ASpawnZone()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	SpawnBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Spawning Box"));
 }
 
 // Called when the game starts or when spawned
@@ -23,5 +24,15 @@ void ASpawnZone::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+FVector ASpawnZone::GetSpawnPoint()
+{
+	FVector Extent = SpawnBox->GetScaledBoxExtent();
+	FVector Origin = SpawnBox->GetComponentLocation();
+
+	FVector RandomPoint = UKismetMathLibrary::RandomPointInBoundingBox(Origin, Extent);
+
+	return RandomPoint;
 }
 
