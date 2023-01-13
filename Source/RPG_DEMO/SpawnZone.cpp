@@ -36,16 +36,18 @@ FVector ASpawnZone::GetSpawnPoint()
 	return RandomPoint;
 }
 
-//void SpawnPawn_Implementation(UClass* spawn, const FVector& location)
-//{
-//	if (spawn)
-//	{
-//		//UWorld* World = GetWorld();
-//
-//		/*if (World)
-//		{
-//			World->SpawnActor<
-//		}*/
-//	}
-//}
+void ASpawnZone::SpawnPawn_Implementation(UClass* spawn, const FVector& location)
+{
+	if (spawn)
+	{
+		UWorld* World = GetWorld();
+		FActorSpawnParameters SpawnParam;
+
+		if (World)
+		{
+			// ***CHANGE ACTOR TO ENEMY CLASS***
+			ABaseItem* ItemSpawned = World->SpawnActor<ABaseItem>(spawn, location, FRotator(0.0f), SpawnParam);
+		}
+	}
+}
 
