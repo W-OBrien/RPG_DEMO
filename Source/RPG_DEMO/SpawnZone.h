@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/BoxComponent.h"
+#include "Engine/World.h"
 #include "SpawnZone.generated.h"
 
 UCLASS()
@@ -36,5 +37,8 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Spawn")
 	FVector GetSpawnPoint();
+
+	//UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spawn")
+	//void SpawnPawn(UClass* spawn, const FVector& location);
 
 };

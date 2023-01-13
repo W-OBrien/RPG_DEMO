@@ -36,3 +36,16 @@ FVector ASpawnZone::GetSpawnPoint()
 	return RandomPoint;
 }
 
+//void SpawnPawn_Implementation(UClass* spawn, const FVector& location)
+//{
+//	if (spawn)
+//	{
+//		//UWorld* World = GetWorld();
+//
+//		/*if (World)
+//		{
+//			World->SpawnActor<
+//		}*/
+//	}
+//}
+
