@@ -23,8 +23,8 @@ public:
 	class UBoxComponent* SpawnBox;
 
 	//spawn a pawn in volume
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn")
-	//TSubclassOf<include class to spawn> SpawnPawn;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn")
+	TSubclassOf<class ABaseItem> PawnSpawn;
 
 protected:
 	// Called when the game starts or when spawned

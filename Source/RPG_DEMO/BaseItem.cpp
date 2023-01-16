@@ -11,6 +11,12 @@ ABaseItem::ABaseItem()
 
 	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision Sphere"));
 	RootComponent = Collision;
+	
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	ItemMesh->SetupAttachment(GetRootComponent());
+
+	IdleParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Idle Item Particles"));
+	IdleParticles->SetupAttachment(GetRootComponent());
 
 }
 
@@ -34,6 +40,17 @@ void ABaseItem::Tick(float DeltaTime)
 void ABaseItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Overlap Begin"));
+
+	if(OnOvelapParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), OnOvelapParticles, GetActorLocation(), FRotator(0.f), true);
+	}
+
+	/*if (ItemOverlapSound)
+	{
+		UGameplayStatics::PlaySound2D(this, ItemOverlapSound);
+	}*/
+	Destroy();
 }
 
 void ABaseItem::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
