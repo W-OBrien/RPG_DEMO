@@ -18,6 +18,8 @@ ABaseItem::ABaseItem()
 	IdleParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Idle Item Particles"));
 	IdleParticles->SetupAttachment(GetRootComponent());
 
+	bIsRotating = false;
+	RotationSpeed = 30.f;
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +37,13 @@ void ABaseItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bIsRotating)
+	{
+		FRotator Rotation = GetActorRotation();
+		Rotation.Yaw += DeltaTime * RotationSpeed;
+		SetActorRotation(Rotation);
+	}
+
 }
 
 void ABaseItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -46,10 +55,11 @@ void ABaseItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor*
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), OnOvelapParticles, GetActorLocation(), FRotator(0.f), true);
 	}
 
-	/*if (ItemOverlapSound)
+	if (ItemOverlapSound)
 	{
 		UGameplayStatics::PlaySound2D(this, ItemOverlapSound);
-	}*/
+	}
+
 	Destroy();
 }
 

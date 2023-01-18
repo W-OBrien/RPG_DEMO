@@ -7,9 +7,12 @@ void UCharacterAnimInstance::NativeInitializeAnimation()
 	if (Pawn == nullptr)
 	{
 		Pawn = TryGetPawnOwner();
+
+		if (Pawn)
+		{
+			Player = Cast<APlayerCharacter>(Pawn);
+		}
 	}
-
-
 }
 
 void UCharacterAnimInstance::UpdateAnimProperties()
@@ -27,5 +30,10 @@ void UCharacterAnimInstance::UpdateAnimProperties()
 		MovementSpeed = LateralSpeed.Size();
 
 		bIsJumping = Pawn->GetMovementComponent()->IsFalling();
+
+		if (Player == nullptr)
+		{
+			Player = Cast<APlayerCharacter>(Pawn);
+		}
 	}
 }

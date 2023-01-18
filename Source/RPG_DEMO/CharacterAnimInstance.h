@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimInstance.h"
+#include "PlayerCharacter.h"
 #include "CharacterAnimInstance.generated.h"
 
 
@@ -31,5 +32,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	class APawn* Pawn;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	class APlayerCharacter* Player;
 };
