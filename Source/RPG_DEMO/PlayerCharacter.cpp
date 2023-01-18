@@ -65,11 +65,14 @@ APlayerCharacter::APlayerCharacter()
 }
 
 
+
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//UKismetSystemLibrary::DrawDebugSphere(this, GetActorLocation() + FVector(0, 0, 100.f), 25.f,25.f, FLinearColor::Red, 5.f, 1.f);
+
 }
 
 // Called every frame
@@ -287,5 +290,17 @@ void APlayerCharacter::ShiftUp()
 	bShiftDown = false;
 }
 
+void APlayerCharacter::ShowPickupLocation()
+{
+	/*for (int32 i = 0; i < PickupLocation.Num(); i++)
+	{
+		UKismetSystemLibrary::DrawDebugSphere(this, PickupLocation[i], 25.f, 25.f, FLinearColor::Red, 5.f, 1.f);
+	}*/
+
+	for (FVector Location : PickupLocation)
+	{
+		UKismetSystemLibrary::DrawDebugSphere(this, Location, 25.f, 25.f, FLinearColor::Red, 10.f, 1.f);
+	}
+}
 
 

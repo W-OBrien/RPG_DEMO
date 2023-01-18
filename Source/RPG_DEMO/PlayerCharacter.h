@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "PlayerCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -36,6 +37,11 @@ class RPG_DEMO_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+
+	TArray<FVector> PickupLocation;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowPickupLocation();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enum")
 	EMovementState MovementState;
