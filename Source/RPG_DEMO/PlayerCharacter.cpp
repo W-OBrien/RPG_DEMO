@@ -2,6 +2,7 @@
 
 
 #include "PlayerCharacter.h"
+#include "Weapon.h"
 
 
 
@@ -55,6 +56,8 @@ APlayerCharacter::APlayerCharacter()
 	RunSpeed = 900.f;
 
 	bShiftDown = false;
+	BIsLeftClick = false;
+	bIsEDown = false;
 
 	//Enums Initialize
 	MovementState = EMovementState::EMS_Base;
@@ -183,6 +186,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &APlayerCharacter::ShiftDown);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &APlayerCharacter::ShiftUp);
 
+	PlayerInputComponent->BindAction("LMB", IE_Pressed, this, &APlayerCharacter::OnLeftClick);
+	PlayerInputComponent->BindAction("LMB", IE_Released, this, &APlayerCharacter::OnLeftClickRelease);
+
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::OnEDown);
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &APlayerCharacter::OnERelease);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 
@@ -259,7 +268,7 @@ void APlayerCharacter::Heal(float hp)
 
 void APlayerCharacter::Die()
 {
-
+	/// Die Logic
 }
 
 void APlayerCharacter::AddCoins(int32 coin)
@@ -288,6 +297,48 @@ void APlayerCharacter::ShiftDown()
 void APlayerCharacter::ShiftUp()
 {
 	bShiftDown = false;
+}
+
+void APlayerCharacter::OnLeftClick()
+{
+	BIsLeftClick = true;
+}
+
+void APlayerCharacter::OnLeftClickRelease()
+{
+	BIsLeftClick = false;
+}
+
+void APlayerCharacter::OnEDown()
+{
+	bIsEDown = true;
+
+	if (OverlappingItem)
+	{
+		AWeapon* Weapon = Cast<AWeapon>(OverlappingItem);
+
+		if (Weapon)
+		{
+			Weapon->EquipWeapon(this);
+			SetOverlappingItem(nullptr);
+		}
+	}
+}
+
+void APlayerCharacter::OnERelease()
+{
+	bIsEDown = false;
+}
+
+
+void APlayerCharacter::SetEquippedWeapon(AWeapon* WeaponToSet)
+{
+	if (EquipedWeapon)
+	{
+		EquipedWeapon->Destroy();
+	}
+
+	EquipedWeapon = WeaponToSet;
 }
 
 void APlayerCharacter::ShowPickupLocation()

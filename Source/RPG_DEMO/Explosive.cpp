@@ -19,6 +19,7 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 		if (Player)
 		{
 			Player->TakeDamage(Damage);
+			Destroy();
 		}
 	}
 }

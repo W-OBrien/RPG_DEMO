@@ -37,7 +37,7 @@ class RPG_DEMO_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
-
+	
 	TArray<FVector> PickupLocation;
 
 	UFUNCTION(BlueprintCallable)
@@ -97,6 +97,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	float BaseLookUpRate;
 
+
+	void OnLeftClick();
+	void OnLeftClickRelease();
+
+	bool BIsLeftClick;
+
+	void OnEDown();
+	void OnERelease();
+
+	bool bIsEDown;
+
 	FORCEINLINE class USpringArmComponent* GetCameraArm() const
 	{
 		return CameraArm;
@@ -105,6 +116,25 @@ public:
 	FORCEINLINE class UCameraComponent* GetPlayerCamera() const
 	{
 		return PlayerCamera;
+	}
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items | Weapon")
+	class AWeapon* EquipedWeapon;
+
+	void SetEquippedWeapon(AWeapon* WeaponToSet);
+
+	FORCEINLINE AWeapon* GetEquippedWeapon()
+	{
+		return EquipedWeapon;
+	}
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
+	class ABaseItem* OverlappingItem;
+
+	FORCEINLINE void SetOverlappingItem(ABaseItem* OverlapItem)
+	{
+		OverlappingItem = OverlapItem;
 	}
 
 protected:
@@ -156,4 +186,7 @@ public:
 
 	UFUNCTION()
 	void AddCoins(int32 coin);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animations")
+	bool bIsAttacking;
 };

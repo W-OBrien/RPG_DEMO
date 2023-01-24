@@ -20,6 +20,7 @@ void AHealthPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			Player->Heal(HP);
 			Player->PickupLocation.Add(GetActorLocation());
+			Destroy();
 		}
 	}
 }
