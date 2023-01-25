@@ -276,6 +276,7 @@ void APlayerCharacter::AddCoins(int32 coin)
 	Coins += coin;
 }
 
+
 void APlayerCharacter::SetMovementState(EMovementState state)
 {
 	MovementState = state;
@@ -302,12 +303,31 @@ void APlayerCharacter::ShiftUp()
 void APlayerCharacter::OnLeftClick()
 {
 	BIsLeftClick = true;
+
+	if (EquipedWeapon)
+	{
+		Attack();
+	}
 }
 
 void APlayerCharacter::OnLeftClickRelease()
 {
 	BIsLeftClick = false;
 }
+
+void APlayerCharacter::Attack()
+{
+	bIsAttacking = true;
+
+	UAnimInstance* AnimationInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimationInstance && AttackMontage)
+	{
+		AnimationInstance->Montage_Play(AttackMontage, 1.25f);
+		AnimationInstance->Montage_JumpToSection(FName("Attack 1"), AttackMontage);
+	}
+}
+
 
 void APlayerCharacter::OnEDown()
 {

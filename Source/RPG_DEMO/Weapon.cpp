@@ -26,10 +26,10 @@ void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* O
 	}
 }
 
-void AWeapon::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	Super::OnOverlapEnd(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
-}
+//void AWeapon::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+//{
+//	Super::OnOverlapEnd(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
+//}
 
 void AWeapon::EquipWeapon(APlayerCharacter* Player)
 {
@@ -48,6 +48,7 @@ void AWeapon::EquipWeapon(APlayerCharacter* Player)
 			//Player->GetEquippedWeapon()->Destroy();
 			Player->SetEquippedWeapon(this);
 			Player->SetOverlappingItem(nullptr);
+			EWeaponState::EWS_Equipped;
 		}
 
 		if (EquipSound)
