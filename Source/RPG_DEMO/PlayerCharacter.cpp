@@ -204,7 +204,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::MoveForward(float axis)
 {
-	if ((Controller != nullptr) && (axis != 0.f))
+	if ((Controller != nullptr) && (axis != 0.f) && !bIsAttacking)
 	{
 		// Find the forward direction
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -218,7 +218,7 @@ void APlayerCharacter::MoveForward(float axis)
 
 void APlayerCharacter::MoveRight(float axis)
 {
-	if ((Controller != nullptr) && (axis != 0.f))
+	if ((Controller != nullptr) && (axis != 0.f) && !bIsAttacking)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
@@ -317,15 +317,23 @@ void APlayerCharacter::OnLeftClickRelease()
 
 void APlayerCharacter::Attack()
 {
-	bIsAttacking = true;
-
-	UAnimInstance* AnimationInstance = GetMesh()->GetAnimInstance();
-
-	if (AnimationInstance && AttackMontage)
+	if (!bIsAttacking)
 	{
-		AnimationInstance->Montage_Play(AttackMontage, 1.25f);
-		AnimationInstance->Montage_JumpToSection(FName("Attack 1"), AttackMontage);
+		bIsAttacking = true;
+
+		UAnimInstance* AnimationInstance = GetMesh()->GetAnimInstance();
+
+		if (AnimationInstance && AttackMontage)
+		{
+			AnimationInstance->Montage_Play(AttackMontage, 1.25f);
+			AnimationInstance->Montage_JumpToSection(FName("Attack 1"), AttackMontage);
+		}
 	}
+}
+
+void APlayerCharacter::AttackEnd()
+{
+	bIsAttacking = false;
 }
 
 

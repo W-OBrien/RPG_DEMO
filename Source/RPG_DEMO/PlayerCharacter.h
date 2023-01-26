@@ -193,6 +193,9 @@ public:
 	bool bIsAttacking;
 
 	void Attack();
+	
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
 	class UAnimMontage* AttackMontage;
