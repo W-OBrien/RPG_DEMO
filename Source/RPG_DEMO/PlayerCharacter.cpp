@@ -325,8 +325,31 @@ void APlayerCharacter::Attack()
 
 		if (AnimationInstance && AttackMontage)
 		{
-			AnimationInstance->Montage_Play(AttackMontage, 1.25f);
-			AnimationInstance->Montage_JumpToSection(FName("Attack 1"), AttackMontage);
+			int32 Attacks = FMath::RandRange(0, 2);
+
+			switch (Attacks)
+			{
+			case 0:
+				AnimationInstance->Montage_Play(AttackMontage, 1.25f);
+				AnimationInstance->Montage_JumpToSection(FName("Attack 1"), AttackMontage);
+
+				break;
+			case 1:
+				AnimationInstance->Montage_Play(AttackMontage, 1.25f);
+				AnimationInstance->Montage_JumpToSection(FName("Attack 2"), AttackMontage);
+
+				break;
+			case 2:
+				AnimationInstance->Montage_Play(AttackMontage, 1.25f);
+				AnimationInstance->Montage_JumpToSection(FName("Attack 3"), AttackMontage);
+
+				break;
+
+			default:
+				break;
+			}
+
+			
 		}
 	}
 }

@@ -8,6 +8,9 @@ AWeapon::AWeapon()
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon Mesh"));
 	WeaponMesh->SetupAttachment(GetRootComponent());
 
+	WeaponCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Combat Collision"));
+	WeaponCollision->SetupAttachment(GetRootComponent());
+
 	WeaponState = EWeaponState::EWS_Pickup;
 }
 
