@@ -17,8 +17,17 @@ AEnemyBase::AEnemyBase()
 	AttackSphere->SetupAttachment(GetRootComponent());
 	AttackSphere->InitSphereRadius(100.f);
 
+	DamageCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Enemy Combat Collision"));
+	DamageCollision->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("AttackSocket"));
+
 	bIsAttackOverlap = false;
 
+	Health = 150.f;
+	MaxHealth = 150.f;
+	Damage = 20.f;
+
+	MinAttackWaitTime = 1.f;
+	MaxAttackWaitTime = 2.5f;
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +42,14 @@ void AEnemyBase::BeginPlay()
 
 	AttackSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::AttackSphereOnOverlapBegin);
 	AttackSphere->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::AttackSphereOnOverlapEnd);
+
+	DamageCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::OnAttackOverlapBegin);
+	DamageCollision->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::OnAttackOverlapEnd);
+
+	DamageCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DamageCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	DamageCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	DamageCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 }
 
 // Called every frame
@@ -68,9 +85,10 @@ void AEnemyBase::ChaseSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponen
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
+		SetEnemyState(EEnemyState::ES_Idle);
+
 		if (Player)
 		{
-			SetEnemyState(EEnemyState::ES_Idle);
 
 			AIController->StopMovement();
 		}
@@ -84,14 +102,17 @@ void AEnemyBase::AttackSphereOnOverlapBegin(UPrimitiveComponent* OverlappedCompo
 	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+		SetEnemyState(EEnemyState::ES_Attack);
 
 		if (Player)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Attack Sphere OnOverlapBegin"));
+			bIsAttackOverlap = true;
 			AttackTarget = Player;
 
-			bIsAttackOverlap = true;
+			Player->SetTarget(this);
 
-			SetEnemyState(EEnemyState::ES_Attack);
+			Attack();
 		}
 	}
 }
@@ -101,20 +122,65 @@ void AEnemyBase::AttackSphereOnOverlapEnd(UPrimitiveComponent* OverlappedCompone
 	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+		SetEnemyState(EEnemyState::ES_Chase);
 
 		if (Player)
 		{
-			bIsAttackOverlap = false;
+			if (Player->EnemyTarget == this)
+			{
+				Player->SetTarget(nullptr);
+			}
 
+			bIsAttackOverlap = false;
+			
 			if (EnemyState != EEnemyState::ES_Attack)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("EnemyState != EEnemyState::ES_Attack"));
+
 				MoveToPlayer(Player);
 				AttackTarget = nullptr;
 			}
-			/*SetEnemyState(EEnemyState::ES_Chase);
-			MoveToPlayer(Player);*/
+			GetWorldTimerManager().ClearTimer(AttackTimer);
 		}
 	}
+}
+
+void AEnemyBase::OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor)
+	{
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+
+		if (Player)
+		{
+			//Add particle effects when the player gets hit
+			/*if (Player->OnHitParticles)
+			{
+				const USkeletalMeshSocket* AttackSocket = GetMesh()->GetSocketByName("AttackSocket");
+
+				if (AttackSocket)
+				{
+					FVector SocketLocation = AttackSocket->GetSocketLocation(AttackSocket);
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Player->OnHitParticles, SocketLocation, FRotator(0.f), false);
+				}
+			}*/
+
+			if (Player->HitSound)
+			{
+				UGameplayStatics::PlaySound2D(this, Player->HitSound);
+			}
+			
+			if (DamageType)
+			{
+				UGameplayStatics::ApplyDamage(Player, Damage, AIController, this, DamageType);
+			}
+		}
+	}
+}
+
+void AEnemyBase::OnAttackOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	DamageCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 
@@ -122,13 +188,13 @@ void AEnemyBase::MoveToPlayer(APlayerCharacter* Player)
 {
 	SetEnemyState(EEnemyState::ES_Chase);
 
-	UE_LOG(LogTemp, Warning, TEXT("Move To Player TEST"));
+	//UE_LOG(LogTemp, Warning, TEXT("Move To Player TEST"));
 
 	if (AIController)
 	{
 		FAIMoveRequest MoveRequest;
 		MoveRequest.SetGoalActor(Player);
-		MoveRequest.SetAcceptanceRadius(30.f);
+		MoveRequest.SetAcceptanceRadius(20.f);
 
 		FNavPathSharedPtr NavPath;
 
@@ -143,6 +209,54 @@ void AEnemyBase::MoveToPlayer(APlayerCharacter* Player)
 
 			UKismetSystemLibrary::DrawDebugSphere(this, Location, 25.f, 25.f, FLinearColor::Red, 10.f, 1.f);
 		}*/
+	}
+}
+
+void AEnemyBase::EnableCollision()
+{
+	DamageCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void AEnemyBase::DisableCollision()
+{
+	DamageCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AEnemyBase::Attack()
+{
+	if (AIController)
+	{
+		AIController->StopMovement();
+		SetEnemyState(EEnemyState::ES_Attack);
+	}
+
+	if (!bIsAttacking)
+	{
+		bIsAttacking = true;
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(AttackMontage, 1.25f);
+			AnimInstance->Montage_JumpToSection(FName("Attack"), AttackMontage);
+		}
+
+		if (AttackSound)
+		{
+			UGameplayStatics::PlaySound2D(this, AttackSound);
+		}
+	}
+}
+
+void AEnemyBase::AttackEnd()
+{
+	bIsAttacking = false;
+
+	if (bIsAttackOverlap)
+	{
+		float AttackWaitTime = FMath::FRandRange(MinAttackWaitTime, MaxAttackWaitTime);
+		GetWorldTimerManager().SetTimer(AttackTimer, this, &AEnemyBase::Attack, AttackWaitTime);
 	}
 }
 

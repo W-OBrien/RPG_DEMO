@@ -56,7 +56,7 @@ APlayerCharacter::APlayerCharacter()
 	RunSpeed = 900.f;
 
 	bShiftDown = false;
-	BIsLeftClick = false;
+	bIsLeftClick = false;
 	bIsEDown = false;
 
 	//Enums Initialize
@@ -65,6 +65,9 @@ APlayerCharacter::APlayerCharacter()
 
 	StaminaRate = 5.f;
 	RunMinStamina = 10.f;
+
+	Interp = 15.f;
+	bInterpToEnemy = false;
 }
 
 
@@ -171,6 +174,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 		;
 	}
 
+	if (bInterpToEnemy && EnemyTarget)
+	{
+		FRotator LookAtYaw = GetYawRotation(EnemyTarget->GetActorLocation());
+		FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), LookAtYaw, DeltaTime, Interp);
+
+		SetActorRotation(InterpRotation);
+	}
 }
 
 // Called to bind functionality to input
@@ -240,7 +250,14 @@ void APlayerCharacter::LookUpRate(float rate)
 	AddControllerPitchInput(rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void APlayerCharacter::TakeDamage(float dmg)
+FRotator APlayerCharacter::GetYawRotation(FVector target)
+{
+	FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target);
+	FRotator LookYawRotation(0.f, LookAt.Yaw, 0.f);
+	return LookYawRotation;
+}
+
+void APlayerCharacter::LowerHealth(float dmg)
 {
 	if (Health - dmg <= 0.f)
 	{
@@ -251,6 +268,12 @@ void APlayerCharacter::TakeDamage(float dmg)
 	{
 		Health -= dmg;
 	}
+}
+
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	LowerHealth(DamageAmount);
+	return DamageAmount;
 }
 
 void APlayerCharacter::Heal(float hp)
@@ -302,7 +325,7 @@ void APlayerCharacter::ShiftUp()
 
 void APlayerCharacter::OnLeftClick()
 {
-	BIsLeftClick = true;
+	bIsLeftClick = true;
 
 	if (EquipedWeapon)
 	{
@@ -312,7 +335,7 @@ void APlayerCharacter::OnLeftClick()
 
 void APlayerCharacter::OnLeftClickRelease()
 {
-	BIsLeftClick = false;
+	bIsLeftClick = false;
 }
 
 void APlayerCharacter::Attack()
@@ -320,6 +343,7 @@ void APlayerCharacter::Attack()
 	if (!bIsAttacking)
 	{
 		bIsAttacking = true;
+		SetInterp(true);
 
 		UAnimInstance* AnimationInstance = GetMesh()->GetAnimInstance();
 
@@ -348,8 +372,6 @@ void APlayerCharacter::Attack()
 			default:
 				break;
 			}
-
-			
 		}
 	}
 }
@@ -357,6 +379,25 @@ void APlayerCharacter::Attack()
 void APlayerCharacter::AttackEnd()
 {
 	bIsAttacking = false;
+	SetInterp(false);
+
+	if (bIsLeftClick)
+	{
+		Attack();
+	}
+}
+
+void APlayerCharacter::SetInterp(bool interp)
+{
+	bInterpToEnemy = interp;
+}
+
+void APlayerCharacter::PlaySlashSound()
+{
+	if (EquipedWeapon->SlashSound)
+	{
+		UGameplayStatics::PlaySound2D(this, EquipedWeapon->SlashSound);
+	}
 }
 
 

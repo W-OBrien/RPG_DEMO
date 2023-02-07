@@ -11,6 +11,9 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimInstance.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Math/Rotator.h"
 #include "PlayerCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -42,19 +45,34 @@ public:
 	
 	TArray<FVector> PickupLocation;
 
-	UFUNCTION(BlueprintCallable)
-	void ShowPickupLocation();
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enum")
 	EMovementState MovementState;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enum")
 	EStaminaState StaminaState;
 
-	FORCEINLINE void SetStaminaState(EStaminaState state)
-	{
-		StaminaState = state;
-	}
+	// Placing camera behind the player
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraArm;
+
+	// Creating camera that will follow the player
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* PlayerCamera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items | Weapon")
+	class AWeapon* EquipedWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
+	class ABaseItem* OverlappingItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundCue* HitSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
+	class UAnimMontage* AttackMontage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	class AEnemyBase* EnemyTarget;
 
 	//Rate at wich stamina will drain while running
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Run | Stamina")
@@ -85,59 +103,38 @@ public:
 	//Stop running
 	void ShiftUp();
 
-	// Placing camera behind the player
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraArm;
-
-	// Creating camera that will follow the player
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* PlayerCamera;
-
 	// Base rates to scale turning founctions for the camera 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	float BaseTurnRate;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	float BaseLookUpRate;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
+	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+	float Health;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
+	float MaxStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+	float Stamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+	int32 Coins;
 
 	void OnLeftClick();
 	void OnLeftClickRelease();
 
-	bool BIsLeftClick;
+	bool bIsLeftClick;
 
 	void OnEDown();
 	void OnERelease();
 
 	bool bIsEDown;
 
-	FORCEINLINE class USpringArmComponent* GetCameraArm() const
-	{
-		return CameraArm;
-	}
-	
-	FORCEINLINE class UCameraComponent* GetPlayerCamera() const
-	{
-		return PlayerCamera;
-	}
+	float Interp;
 
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items | Weapon")
-	class AWeapon* EquipedWeapon;
-
-	void SetEquippedWeapon(AWeapon* WeaponToSet);
-
-	FORCEINLINE AWeapon* GetEquippedWeapon()
-	{
-		return EquipedWeapon;
-	}
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
-	class ABaseItem* OverlappingItem;
-
-	FORCEINLINE void SetOverlappingItem(ABaseItem* OverlapItem)
-	{
-		OverlappingItem = OverlapItem;
-	}
+	bool bInterpToEnemy;
 
 protected:
 	// Called when the game starts or when spawned
@@ -164,21 +161,16 @@ public:
 	// param "float rate" is normalized (1 = 100%)
 	void LookUpRate(float rate);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
-	float MaxHealth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
-	float Health;
+	FRotator GetYawRotation(FVector target);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
-	float MaxStamina;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
-	float Stamina;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
-	int32 Coins;
+	UFUNCTION(BlueprintCallable)
+	void ShowPickupLocation();
 
 	UFUNCTION()
-	void TakeDamage(float dmg);
+	void LowerHealth(float dmg);
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 
 	UFUNCTION()
 	void Heal(float hp);
@@ -189,6 +181,8 @@ public:
 	UFUNCTION()
 	void AddCoins(int32 coin);
 
+	void SetEquippedWeapon(AWeapon* WeaponToSet);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animations")
 	bool bIsAttacking;
 
@@ -197,6 +191,38 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
-	class UAnimMontage* AttackMontage;
+	void SetInterp(bool interp);
+
+	UFUNCTION(BlueprintCallable)
+	void PlaySlashSound();
+
+	FORCEINLINE class USpringArmComponent* GetCameraArm() const
+	{
+		return CameraArm;
+	}
+
+	FORCEINLINE class UCameraComponent* GetPlayerCamera() const
+	{
+		return PlayerCamera;
+	}
+
+	FORCEINLINE void SetStaminaState(EStaminaState state)
+	{
+		StaminaState = state;
+	}
+
+	FORCEINLINE AWeapon* GetEquippedWeapon()
+	{
+		return EquipedWeapon;
+	}
+
+	FORCEINLINE void SetOverlappingItem(ABaseItem* OverlapItem)
+	{
+		OverlappingItem = OverlapItem;
+	}
+
+	FORCEINLINE	void SetTarget(AEnemyBase* Target)
+	{
+		EnemyTarget = Target;
+	}
 };

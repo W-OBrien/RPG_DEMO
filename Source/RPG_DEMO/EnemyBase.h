@@ -8,6 +8,11 @@
 #include "AIController.h"
 #include "PlayerCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Sound/SoundCue.h"
+#include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Animation/AnimInstance.h"
+#include "TimerManager.h"
 #include "EnemyBase.generated.h"
 
 UENUM(BlueprintType)
@@ -56,6 +61,48 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class AAIController* AIController;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
+	APlayerCharacter* AttackTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	class UParticleSystem* OnHitParticles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundCue* HitSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundCue* AttackSound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI | Collision")
+	class UBoxComponent* DamageCollision;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI | Animations")
+	class UAnimMontage* AttackMontage;
+
+
+	FTimerHandle AttackTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<UDamageType> DamageType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
+	float MinAttackWaitTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
+	float MaxAttackWaitTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
+	bool bIsAttackOverlap;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
+	float Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
+	float MaxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
+	float Damage;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -80,12 +127,27 @@ public:
 	UFUNCTION()
 	virtual void AttackSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
-	bool bIsAttackOverlap;
+	UFUNCTION()
+	void OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
-	APlayerCharacter* AttackTarget;
+	UFUNCTION()
+	void OnAttackOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION(BlueprintCallable)
 	void MoveToPlayer(APlayerCharacter* Player);
+
+	UFUNCTION(BlueprintCallable)
+	void EnableCollision();
+
+	UFUNCTION(BlueprintCallable)
+	void DisableCollision();
+
+	UFUNCTION()
+	void Attack();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI | Animations")
+	bool bIsAttacking;
 };

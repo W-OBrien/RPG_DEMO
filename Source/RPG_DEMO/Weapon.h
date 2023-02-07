@@ -10,6 +10,8 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
+#include "EnemyBase.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -26,6 +28,10 @@ class RPG_DEMO_API AWeapon : public ABaseItem
 {
 	GENERATED_BODY()
 
+protected:
+
+	virtual void BeginPlay() override;
+
 public:
 
 	AWeapon();
@@ -40,12 +46,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item | Sound")
 	class USoundCue* EquipSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item | Sound")
+	USoundCue* SlashSound;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item | Collision")
 	class UBoxComponent* WeaponCollision;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item | Collision")
+	float Damage;
+
 	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
-	//virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
+	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
+
+	UFUNCTION()
+	void OnBladeOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnBladeOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void EquipWeapon(APlayerCharacter* Player);
 
@@ -58,5 +76,11 @@ public:
 	{
 		return WeaponState;
 	}
-	
+
+	UFUNCTION(BlueprintCallable)
+	void EnableCollision();
+
+	UFUNCTION(BlueprintCallable)
+	void DisableCollision();
+
 };
