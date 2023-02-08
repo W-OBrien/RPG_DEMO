@@ -14,6 +14,7 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/Rotator.h"
+#include "PlayerCharController.h"
 #include "PlayerCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -43,6 +44,8 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 	
+	
+
 	TArray<FVector> PickupLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enum")
@@ -73,6 +76,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	class AEnemyBase* EnemyTarget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	FVector EnemyTargetLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Controller")
+	class APlayerCharController* PlayerController;
 
 	//Rate at wich stamina will drain while running
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Run | Stamina")
@@ -136,6 +145,9 @@ public:
 
 	bool bInterpToEnemy;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = "Combat")
+	bool bHasEnemyTarget;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -171,12 +183,11 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-
 	UFUNCTION()
 	void Heal(float hp);
 
 	UFUNCTION()
-	void Die();
+	void Death();
 
 	UFUNCTION()
 	void AddCoins(int32 coin);
@@ -224,5 +235,10 @@ public:
 	FORCEINLINE	void SetTarget(AEnemyBase* Target)
 	{
 		EnemyTarget = Target;
+	}
+
+	FORCEINLINE	void SetHasEnemyTarget(bool HasTarget)
+	{
+		bHasEnemyTarget = HasTarget;
 	}
 };

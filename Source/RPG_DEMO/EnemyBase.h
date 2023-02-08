@@ -21,6 +21,7 @@ enum class EEnemyState : uint8
 	ES_Idle UMETA(DisplayName = "Idle"),
 	ES_Chase UMETA(DisplayName = "Chase"),
 	ES_Attack UMETA(DisplayName = "Attack"),
+	ES_Dead UMETA(DisplayName = "Dead"),
 	ES_MAX UMETA(DisplayName = "DEFAULT")
 };
 
@@ -39,6 +40,11 @@ public:
 	FORCEINLINE void SetEnemyState(EEnemyState State)
 	{
 		EnemyState = State;
+	}
+
+	FORCEINLINE EEnemyState GetEnemyState()
+	{
+		return EnemyState;
 	}
 
 	//Sphere to detect if player is close enough to chase
@@ -79,11 +85,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI | Animations")
 	class UAnimMontage* AttackMontage;
 
-
 	FTimerHandle AttackTimer;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	FTimerHandle DeathTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
 	TSubclassOf<UDamageType> DamageType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
+	float DestroyDelay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Combat")
 	float MinAttackWaitTime;
@@ -150,4 +160,15 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI | Animations")
 	bool bIsAttacking;
+
+	float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+
+	void Death();
+
+	UFUNCTION(BlueprintCallable)
+	void DeathEnd();
+
+	bool IsEnemyAlive();
+
+	void CorpseDisapear();
 };

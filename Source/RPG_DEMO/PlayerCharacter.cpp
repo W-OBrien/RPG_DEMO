@@ -58,6 +58,7 @@ APlayerCharacter::APlayerCharacter()
 	bShiftDown = false;
 	bIsLeftClick = false;
 	bIsEDown = false;
+	bHasEnemyTarget = false;
 
 	//Enums Initialize
 	MovementState = EMovementState::EMS_Base;
@@ -76,6 +77,8 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	PlayerController = Cast<APlayerCharController>(GetController());
 	
 	//UKismetSystemLibrary::DrawDebugSphere(this, GetActorLocation() + FVector(0, 0, 100.f), 25.f,25.f, FLinearColor::Red, 5.f, 1.f);
 
@@ -181,6 +184,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 		SetActorRotation(InterpRotation);
 	}
+
+	if (EnemyTarget)
+	{
+		EnemyTargetLocation = EnemyTarget->GetActorLocation();
+
+		if (PlayerController)
+		{
+			PlayerController->EnemyLocation = EnemyTargetLocation;
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -262,7 +275,7 @@ void APlayerCharacter::LowerHealth(float dmg)
 	if (Health - dmg <= 0.f)
 	{
 		Health -= dmg;
-		Die();
+		Death();
 	}
 	else
 	{
@@ -289,9 +302,15 @@ void APlayerCharacter::Heal(float hp)
 	}
 }
 
-void APlayerCharacter::Die()
+void APlayerCharacter::Death()
 {
-	/// Die Logic
+	UAnimInstance* AnimationInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimationInstance && AttackMontage)
+	{
+		AnimationInstance->Montage_Play(AttackMontage, 1.0f);
+		AnimationInstance->Montage_JumpToSection(FName("Death"));
+	}
 }
 
 void APlayerCharacter::AddCoins(int32 coin)
